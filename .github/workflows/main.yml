@@ -12,17 +12,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Project and Build
+      - name: Create App
         run: |
           cordova create myapp com.example.time TimeApp
           cd myapp
           cordova platform add android
-          # Копируем ваш index.html в папку сборки
+          # Очищаем стандартный контент и кладем ваш HTML
+          rm -rf www/*
           cp ../index.html www/index.html
-          # Собираем APK
+          # Важный костыль для стабильности сборки
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > platforms/android/local.properties
           cordova build android --debug
 
       - name: Upload APK
@@ -30,4 +35,3 @@ jobs:
         with:
           name: TimeConverter-APK
           path: myapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-
